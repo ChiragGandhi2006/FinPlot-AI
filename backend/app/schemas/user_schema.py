@@ -3,9 +3,9 @@ from typing import Optional
 from datetime import datetime
 
 
-# -----------------------------
-# Request Schema (Register)
-# -----------------------------
+# ==========================================
+# Register Request Schema
+# ==========================================
 class UserCreate(BaseModel):
 
     first_name: str
@@ -20,9 +20,29 @@ class UserCreate(BaseModel):
     phone: Optional[str] = None
 
 
-# -----------------------------
-# Response Schema
-# -----------------------------
+# ==========================================
+# Login Request Schema
+# ==========================================
+class UserLogin(BaseModel):
+
+    email: EmailStr
+
+    password: str
+
+
+# ==========================================
+# JWT Token Response Schema
+# ==========================================
+class Token(BaseModel):
+
+    access_token: str
+
+    token_type: str
+
+
+# ==========================================
+# User Response Schema
+# ==========================================
 class UserResponse(BaseModel):
 
     user_id: int

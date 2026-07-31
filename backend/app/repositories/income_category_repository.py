@@ -13,22 +13,13 @@ class IncomeCategoryRepository:
     def get_by_name(db: Session, name: str):
         return (
             db.query(IncomeCategory)
-            .filter(
-                IncomeCategory.category_name == name
-            )
+            .filter(IncomeCategory.category_name == name)
             .first()
         )
 
     @staticmethod
-    def create(
-        db: Session,
-        category: IncomeCategory
-    ):
-
+    def create(db: Session, category: IncomeCategory):
         db.add(category)
-
         db.commit()
-
         db.refresh(category)
-
         return category

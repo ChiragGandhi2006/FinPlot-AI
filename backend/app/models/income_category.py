@@ -5,7 +5,6 @@ from sqlalchemy import (
     Boolean,
     DateTime
 )
-
 from sqlalchemy.sql import func
 
 from app.database.database import Base
@@ -25,14 +24,6 @@ class IncomeCategory(Base):
         String(100),
         unique=True,
         nullable=False
-    )
-
-    icon = Column(
-        String(100)
-    )
-
-    color = Column(
-        String(30)
     )
 
     is_default = Column(

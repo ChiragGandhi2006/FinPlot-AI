@@ -7,9 +7,13 @@ class IncomeCategoryCreate(BaseModel):
 
 
 class IncomeCategoryResponse(BaseModel):
+
     category_id: int
+
     category_name: str
+
     is_default: bool
+
     created_at: datetime
 
     class Config:

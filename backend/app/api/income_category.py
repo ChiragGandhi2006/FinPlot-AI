@@ -5,13 +5,13 @@ from sqlalchemy.orm import Session
 
 from app.database.dependencies import get_db
 
+from app.services.income_category_service import (
+    IncomeCategoryService
+)
+
 from app.schemas.income_category_schema import (
     IncomeCategoryCreate,
     IncomeCategoryResponse
-)
-
-from app.services.income_category_service import (
-    IncomeCategoryService
 )
 
 router = APIRouter(
@@ -33,7 +33,8 @@ def get_categories(
 
 @router.post(
     "/",
-    response_model=IncomeCategoryResponse
+    response_model=IncomeCategoryResponse,
+    status_code=201
 )
 def create_category(
     category: IncomeCategoryCreate,

@@ -1,4 +1,6 @@
 from fastapi import FastAPI
+from app.database.database import SessionLocal
+from app.database.seed import seed_income_categories
 
 from app.api.auth import router as auth_router
 from app.database.database import Base, engine
@@ -10,6 +12,11 @@ app = FastAPI(
 )
 
 Base.metadata.create_all(bind=engine)
+db = SessionLocal()
+
+seed_income_categories(db)
+
+db.close()
 app.include_router(auth_router)
 app.include_router(income_category_router)
 @app.get("/")

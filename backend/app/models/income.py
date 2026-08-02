@@ -16,11 +16,7 @@ class Income(Base):
 
     __tablename__ = "income"
 
-    income_id = Column(
-        Integer,
-        primary_key=True,
-        index=True
-    )
+    income_id = Column(Integer, primary_key=True, index=True)
 
     user_id = Column(
         Integer,
@@ -28,8 +24,9 @@ class Income(Base):
         nullable=False
     )
 
-    category = Column(
-        String(100),
+    category_id = Column(
+        Integer,
+        ForeignKey("income_categories.category_id"),
         nullable=False
     )
 
@@ -39,16 +36,26 @@ class Income(Base):
     )
 
     source = Column(
-        String(150)
+        String(100),
+        nullable=False
     )
 
     description = Column(
         String(255)
     )
 
+    payment_method = Column(
+        String(50),
+        nullable=False
+    )
+
     income_date = Column(
         Date,
         nullable=False
+    )
+
+    attachment = Column(
+        String(255)
     )
 
     created_at = Column(

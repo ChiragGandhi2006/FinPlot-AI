@@ -1,63 +1,121 @@
-from sqlalchemy import (
-    Column,
-    Integer,
-    String,
-    Float,
-    Date,
-    DateTime,
-    ForeignKey
+from typing import List
+
+from fastapi import APIRouter, Depends
+from sqlalchemy.orm import Session
+
+from app.database.dependencies import get_db
+from app.api.dependencies import get_current_user
+
+from app.schemas.income_schema import (
+    IncomeCreate,
+    IncomeUpdate,
+    IncomeResponse
 )
-from sqlalchemy.sql import func
 
-from app.database.database import Base
+from app.services.income_service import IncomeService
 
 
-class Income(Base):
+router = APIRouter(
+    prefix="/income",
+    tags=["Income"]
+)
 
-    __tablename__ = "income"
 
-    income_id = Column(
-        Integer,
-        primary_key=True,
-        index=True
+# ==========================
+# Create Income
+# ==========================
+@router.post(
+    "/",
+    response_model=IncomeResponse,
+    status_code=201
+)
+def create_income(
+    income: IncomeCreate,
+    db: Session = Depends(get_db),
+    current_user=Depends(get_current_user)
+):
+
+    return IncomeService.create_income(
+        db=db,
+        user_id=current_user["user_id"],
+        data=income
     )
 
-    user_id = Column(
-        Integer,
-        ForeignKey("users.user_id"),
-        nullable=False
+
+# ==========================
+# Get All Income
+# ==========================
+@router.get(
+    "/",
+    response_model=List[IncomeResponse]
+)
+def get_all_income(
+    db: Session = Depends(get_db),
+    current_user=Depends(get_current_user)
+):
+
+    return IncomeService.get_all_income(
+        db=db,
+        user_id=current_user["user_id"]
     )
 
-    category = Column(
-        String(100),
-        nullable=False
+
+# ==========================
+# Get Single Income
+# ==========================
+@router.get(
+    "/{income_id}",
+    response_model=IncomeResponse
+)
+def get_income(
+    income_id: int,
+    db: Session = Depends(get_db),
+    current_user=Depends(get_current_user)
+):
+
+    return IncomeService.get_income(
+        db=db,
+        user_id=current_user["user_id"],
+        income_id=income_id
     )
 
-    amount = Column(
-        Float,
-        nullable=False
+
+# ==========================
+# Update Income
+# ==========================
+@router.put(
+    "/{income_id}",
+    response_model=IncomeResponse
+)
+def update_income(
+    income_id: int,
+    income: IncomeUpdate,
+    db: Session = Depends(get_db),
+    current_user=Depends(get_current_user)
+):
+
+    return IncomeService.update_income(
+        db=db,
+        user_id=current_user["user_id"],
+        income_id=income_id,
+        data=income
     )
 
-    source = Column(
-        String(150)
-    )
 
-    description = Column(
-        String(255)
-    )
+# ==========================
+# Delete Income
+# ==========================
+@router.delete(
+    "/{income_id}"
+)
+def delete_income(
+    income_id: int,
+    db: Session = Depends(get_db),
+    current_user=Depends(get_current_user)
+):
 
-    income_date = Column(
-        Date,
-        nullable=False
-    )
-
-    created_at = Column(
-        DateTime(timezone=True),
-        server_default=func.now()
-    )
-
-    updated_at = Column(
-        DateTime(timezone=True),
-        server_default=func.now(),
-        onupdate=func.now()
+    return IncomeService.delete_income(
+        db=db,
+        user_id=current_user["user_id"],
+        income_id=income_id
     )

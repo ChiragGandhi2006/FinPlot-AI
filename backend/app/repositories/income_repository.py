@@ -10,13 +10,9 @@ class IncomeRepository:
         db: Session,
         income: Income
     ):
-
         db.add(income)
-
         db.commit()
-
         db.refresh(income)
-
         return income
 
     @staticmethod
@@ -24,7 +20,6 @@ class IncomeRepository:
         db: Session,
         user_id: int
     ):
-
         return (
             db.query(Income)
             .filter(Income.user_id == user_id)
@@ -36,10 +31,24 @@ class IncomeRepository:
         db: Session,
         income_id: int
     ):
-
         return (
             db.query(Income)
             .filter(Income.income_id == income_id)
+            .first()
+        )
+
+    @staticmethod
+    def get_by_id_and_user(
+        db: Session,
+        income_id: int,
+        user_id: int
+    ):
+        return (
+            db.query(Income)
+            .filter(
+                Income.income_id == income_id,
+                Income.user_id == user_id
+            )
             .first()
         )
 
@@ -48,11 +57,8 @@ class IncomeRepository:
         db: Session,
         income: Income
     ):
-
         db.commit()
-
         db.refresh(income)
-
         return income
 
     @staticmethod
@@ -60,7 +66,5 @@ class IncomeRepository:
         db: Session,
         income: Income
     ):
-
         db.delete(income)
-
         db.commit()

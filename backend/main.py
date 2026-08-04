@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from app.api.income import router as income_router
 from app.database.database import SessionLocal
 from app.database.seed import seed_income_categories
 
@@ -19,6 +20,7 @@ seed_income_categories(db)
 db.close()
 app.include_router(auth_router)
 app.include_router(income_category_router)
+app.include_router(income_router)
 @app.get("/")
 def home():
     return {

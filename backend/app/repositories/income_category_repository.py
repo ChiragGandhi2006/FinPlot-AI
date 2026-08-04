@@ -23,6 +23,20 @@ class IncomeCategoryRepository:
         )
 
     @staticmethod
+    def get_by_id(
+    db: Session,
+    category_id: int
+):
+
+     return (
+        db.query(IncomeCategory)
+        .filter(
+            IncomeCategory.category_id == category_id
+        )
+        .first()
+    )
+
+    @staticmethod
     def create(
         db: Session,
         category: IncomeCategory

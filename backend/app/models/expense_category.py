@@ -11,9 +11,9 @@ from sqlalchemy.sql import func
 from app.database.database import Base
 
 
-class IncomeCategory(Base):
+class ExpenseCategory(Base):
 
-    __tablename__ = "income_categories"
+    __tablename__ = "expense_categories"
 
     category_id = Column(
         Integer,

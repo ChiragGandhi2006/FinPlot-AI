@@ -13,11 +13,11 @@ from sqlalchemy.sql import func
 from app.database.database import Base
 
 
-class Income(Base):
+class Expense(Base):
 
-    __tablename__ = "income"
+    __tablename__ = "expenses"
 
-    income_id = Column(
+    expense_id = Column(
         Integer,
         primary_key=True,
         index=True
@@ -31,7 +31,7 @@ class Income(Base):
 
     category_id = Column(
         Integer,
-        ForeignKey("income_categories.category_id"),
+        ForeignKey("expense_categories.category_id"),
         nullable=False
     )
 
@@ -40,7 +40,7 @@ class Income(Base):
         nullable=False
     )
 
-    source = Column(
+    merchant = Column(
         String(100),
         nullable=False
     )
@@ -55,7 +55,7 @@ class Income(Base):
         nullable=False
     )
 
-    income_date = Column(
+    expense_date = Column(
         Date,
         nullable=False
     )

@@ -15,6 +15,10 @@ class UserRepository:
         return db.query(User).filter(User.username == username).first()
 
     @staticmethod
+    def get_by_id(db: Session, user_id: int):
+        return db.query(User).filter(User.user_id == user_id).first()
+
+    @staticmethod
     def create_user(db: Session, user: User):
 
         db.add(user)

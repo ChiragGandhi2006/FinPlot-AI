@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app.api.dependencies import get_current_user
 
@@ -10,6 +10,7 @@ from app.schemas.user_schema import (
     Token
 )
 from app.services.user_service import UserService
+from app.repositories.user_repository import UserRepository
 
 router = APIRouter(
     prefix="/auth",
@@ -39,11 +40,12 @@ def login(
 ):
     return UserService.login_user(db, user)
 
-@router.get("/me")
+@router.get("/me", response_model=UserResponse)
 def current_user(
-
-    user = Depends(get_current_user)
-
+    user=Depends(get_current_user),
+    db: Session = Depends(get_db)
 ):
-
-    return user
+    me = UserRepository.get_by_id(db, user["user_id"])
+    if me is None:
+        raise HTTPException(status_code=404, detail="User not found.")
+    return me

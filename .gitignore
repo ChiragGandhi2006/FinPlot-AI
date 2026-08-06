@@ -4,3 +4,10 @@ __pycache__/
 .env
 generated_reports/
 uploads/
+
+# Frontend
+frontend/node_modules/
+frontend/dist/
+frontend/.env.local
+*.log
+.DS_Store

@@ -1,0 +1,1 @@
+"""FinPilot AI — AI assistant, statement analysis, OCR, and forecasting."""

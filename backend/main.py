@@ -1,4 +1,7 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException, Request
+from fastapi.exceptions import RequestValidationError
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from app.database.seed import seed_expense_categories
 from app.api.dashboard import router as dashboard_router
 from app.api.goal import router as goal_router
@@ -17,10 +20,24 @@ from app.api.expense_category import (
 from app.api.auth import router as auth_router
 from app.database.database import Base, engine
 from app.api.income_category import router as income_category_router
+from app.ai.router import router as ai_router
 from app.models import *
 
 app = FastAPI(
     title="FinPilot AI"
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 Base.metadata.create_all(bind=engine)
@@ -38,7 +55,44 @@ app.include_router(expense_router)
 app.include_router(dashboard_router)
 app.include_router(goal_router)
 app.include_router(report_router)
+app.include_router(ai_router)
 logger.info("Testing logging module")
+
+
+# ==========================================
+# Global exception handlers -> consistent envelope
+# ==========================================
+
+@app.exception_handler(HTTPException)
+async def http_exception_handler(request: Request, exc: HTTPException):
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={"success": False, "message": str(exc.detail), "data": None},
+    )
+
+
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request: Request, exc: RequestValidationError):
+    errors = exc.errors()
+    first = errors[0] if errors else {}
+    field = ".".join(str(p) for p in first.get("loc", [])[1:])
+    detail = first.get("msg", "Invalid request.")
+    message = f"{field}: {detail}" if field else detail
+    return JSONResponse(
+        status_code=422,
+        content={"success": False, "message": message, "data": None},
+    )
+
+
+@app.exception_handler(Exception)
+async def unhandled_exception_handler(request: Request, exc: Exception):
+    logger.exception("Unhandled server error: %s", exc)
+    return JSONResponse(
+        status_code=500,
+        content={"success": False, "message": "An unexpected error occurred.", "data": None},
+    )
+
+
 @app.get("/")
 def home():
     return {

@@ -11,6 +11,12 @@ class Settings(BaseSettings):
 
     ACCESS_TOKEN_EXPIRE_MINUTES: int
 
+    AI_OPENAI_API_KEY: str = ""
+
+    AI_MODEL: str = ""
+
+    AI_BASE_URL: str = "https://api.openai.com/v1"
+
     model_config = SettingsConfigDict(
         env_file=".env",
         extra="ignore"

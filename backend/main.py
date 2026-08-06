@@ -4,6 +4,10 @@ from app.api.dashboard import router as dashboard_router
 from app.api.goal import router as goal_router
 from app.api.income import router as income_router
 from app.database.database import SessionLocal
+from app.api.report import router as report_router
+from app.core.logging import logger
+
+logger.info("Testing logging module")
 from app.database.seed import seed_income_categories
 from app.api.expense import router as expense_router
 from app.api.expense_category import (
@@ -33,6 +37,8 @@ app.include_router(expense_category_router)
 app.include_router(expense_router)
 app.include_router(dashboard_router)
 app.include_router(goal_router)
+app.include_router(report_router)
+logger.info("Testing logging module")
 @app.get("/")
 def home():
     return {

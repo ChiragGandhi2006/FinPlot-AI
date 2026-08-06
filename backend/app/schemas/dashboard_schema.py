@@ -1,4 +1,5 @@
 from pydantic import BaseModel
+from datetime import date
 
 
 class DashboardSummaryResponse(BaseModel):
@@ -17,3 +18,15 @@ class MonthlySummaryItem(BaseModel):
 class CategoryExpenseItem(BaseModel):
     category: str
     amount: float
+
+
+
+class RecentTransactionItem(BaseModel):
+
+    type: str
+
+    title: str
+
+    amount: float
+
+    transaction_date: date

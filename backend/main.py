@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from app.database.seed import seed_expense_categories
 from app.api.dashboard import router as dashboard_router
-
+from app.api.goal import router as goal_router
 from app.api.income import router as income_router
 from app.database.database import SessionLocal
 from app.database.seed import seed_income_categories
@@ -32,6 +32,7 @@ app.include_router(income_router)
 app.include_router(expense_category_router)
 app.include_router(expense_router)
 app.include_router(dashboard_router)
+app.include_router(goal_router)
 @app.get("/")
 def home():
     return {

@@ -10,7 +10,8 @@ from app.api.dependencies import get_current_user
 from app.schemas.goal_schema import (
     GoalCreate,
     GoalUpdate,
-    GoalResponse
+    GoalResponse,
+    GoalProgressResponse
 )
 
 from app.services.goal_service import GoalService
@@ -121,6 +122,26 @@ def delete_goal(
 ):
 
     return GoalService.delete_goal(
+        db=db,
+        user_id=current_user["user_id"],
+        goal_id=goal_id
+    )
+
+# ==========================================
+# Goal Progress
+# ==========================================
+
+@router.get(
+    "/progress/{goal_id}",
+    response_model=GoalProgressResponse
+)
+def get_goal_progress(
+    goal_id: int,
+    db: Session = Depends(get_db),
+    current_user=Depends(get_current_user)
+):
+
+    return GoalService.get_goal_progress(
         db=db,
         user_id=current_user["user_id"],
         goal_id=goal_id

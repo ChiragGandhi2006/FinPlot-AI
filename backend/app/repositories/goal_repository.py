@@ -34,6 +34,22 @@ class GoalRepository:
         )
 
     @staticmethod
+    def get_goal_by_id(
+    db: Session,
+    goal_id: int,
+    user_id: int
+):
+
+     return (
+        db.query(Goal)
+        .filter(
+            Goal.goal_id == goal_id,
+            Goal.user_id == user_id
+        )
+        .first()
+    )
+
+    @staticmethod
     def get_by_id_and_user(
         db: Session,
         goal_id: int,

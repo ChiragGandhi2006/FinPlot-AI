@@ -46,3 +46,31 @@ class GoalResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+class GoalProgressResponse(BaseModel):
+
+    goal_name: str
+
+    target_amount: float
+
+    saved_amount: float
+
+    remaining_amount: float
+
+    progress_percentage: float
+
+    status: str
+
+class GoalProgressResponse(BaseModel):
+
+    goal_name: str
+
+    target_amount: float
+
+    saved_amount: float
+
+    remaining_amount: float
+
+    progress_percentage: float
+
+    status: str

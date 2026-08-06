@@ -15,6 +15,10 @@ from app.repositories.goal_repository import (
 
 class GoalService:
 
+    # ==========================================
+    # Create Goal
+    # ==========================================
+
     @staticmethod
     def create_goal(
         db: Session,
@@ -34,6 +38,10 @@ class GoalService:
             goal
         )
 
+    # ==========================================
+    # Get All Goals
+    # ==========================================
+
     @staticmethod
     def get_all_goals(
         db: Session,
@@ -44,6 +52,10 @@ class GoalService:
             db,
             user_id
         )
+
+    # ==========================================
+    # Get Goal By ID
+    # ==========================================
 
     @staticmethod
     def get_goal(
@@ -66,6 +78,10 @@ class GoalService:
             )
 
         return goal
+
+    # ==========================================
+    # Update Goal
+    # ==========================================
 
     @staticmethod
     def update_goal(
@@ -101,6 +117,10 @@ class GoalService:
             goal
         )
 
+    # ==========================================
+    # Delete Goal
+    # ==========================================
+
     @staticmethod
     def delete_goal(
         db: Session,
@@ -127,5 +147,62 @@ class GoalService:
         )
 
         return {
-            "message":"Goal deleted successfully."
+            "message": "Goal deleted successfully."
+        }
+
+    # ==========================================
+    # Goal Progress Analytics
+    # ==========================================
+
+    @staticmethod
+    def get_goal_progress(
+        db: Session,
+        user_id: int,
+        goal_id: int
+    ):
+
+        goal = GoalRepository.get_by_id_and_user(
+            db,
+            goal_id,
+            user_id
+        )
+
+        if goal is None:
+
+            raise HTTPException(
+                status_code=404,
+                detail="Goal not found."
+            )
+
+        remaining_amount = max(
+            goal.target_amount - goal.saved_amount,
+            0
+        )
+
+        progress_percentage = 0
+
+        if goal.target_amount > 0:
+
+            progress_percentage = (
+                goal.saved_amount /
+                goal.target_amount
+            ) * 100
+
+        return {
+
+            "goal_name": goal.goal_name,
+
+            "target_amount": goal.target_amount,
+
+            "saved_amount": goal.saved_amount,
+
+            "remaining_amount": remaining_amount,
+
+            "progress_percentage": round(
+                progress_percentage,
+                2
+            ),
+
+            "status": goal.status
+
         }

@@ -11,9 +11,10 @@ export const aiApi = {
     const res = await client.post(`${BASE}/forecast`, { months })
     return res.data?.data || res.data
   },
-  analyzeStatement: async (file) => {
+  analyzeStatement: async (file, password = '') => {
     const form = new FormData()
     form.append('file', file)
+    if (password) form.append('password', password)
     const res = await client.post(`${BASE}/statement`, form, {
       headers: { 'Content-Type': 'multipart/form-data' },
     })

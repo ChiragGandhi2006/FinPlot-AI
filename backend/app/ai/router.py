@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
+from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
 from sqlalchemy.orm import Session
 
 from app.ai import llm
@@ -6,7 +6,7 @@ from app.ai.context import build_context
 from app.ai.engine import get_ai_response
 from app.ai.ocr import extract_text, parse_receipt
 from app.ai.schemas import ChatMessage, ForecastRequest
-from app.ai.statement import analyze_transactions, parse_statement
+from app.ai.statement import StatementParseError, analyze_transactions, parse_statement
 from app.api.dependencies import get_current_user
 from app.database.dependencies import get_db
 from app.utils.response import success
@@ -73,6 +73,7 @@ def forecast(
 @router.post("/statement")
 async def analyze_statement(
     file: UploadFile = File(...),
+    password: str = Form(""),
     db: Session = Depends(get_db),
     current_user=Depends(get_current_user),
 ):
@@ -80,9 +81,24 @@ async def analyze_statement(
     if not content:
         raise HTTPException(status_code=400, detail="Empty file uploaded.")
     try:
-        transactions = parse_statement(file.filename or "statement.csv", content)
+        transactions = parse_statement(
+            file.filename or "statement.csv",
+            content,
+            pdf_password=password or None,
+        )
+    except StatementParseError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
     except Exception as exc:  # noqa: BLE001
         raise HTTPException(status_code=422, detail=f"Could not parse statement: {exc}") from exc
+    if not transactions and (file.filename or "").lower().endswith(".pdf"):
+        raise HTTPException(
+            status_code=422,
+            detail=(
+                "No transactions could be read from the PDF. If your bank statement is "
+                "password-protected, enter the statement password; if it is a scanned "
+                "image, OCR must be available. Otherwise export the statement as CSV."
+            ),
+        )
     analysis = analyze_transactions(transactions)
     return success({
         "filename": file.filename or "statement",

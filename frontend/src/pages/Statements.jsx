@@ -29,6 +29,7 @@ export default function Statements() {
   const [dragOver, setDragOver] = useState(false)
   const [forecast, setForecast] = useState(null)
   const [forecastLoading, setForecastLoading] = useState(false)
+  const [pdfPassword, setPdfPassword] = useState('')
 
   const onFile = async (file) => {
     if (!file || loading) return
@@ -37,7 +38,7 @@ export default function Statements() {
     setResult(null)
     setForecast(null)
     try {
-      const res = await aiApi.analyzeStatement(file)
+      const res = await aiApi.analyzeStatement(file, pdfPassword)
       setResult(res)
     } catch (err) {
       setError(err?.message || 'Failed to analyze the statement.')
@@ -98,6 +99,15 @@ export default function Statements() {
           {loading ? 'Analyzing your statement…' : 'Drop your bank statement here'}
         </h3>
         <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">CSV, TXT or PDF · We never store your file</p>
+        <div className="mt-4 w-full max-w-xs" onClick={(e) => e.stopPropagation()}>
+          <input
+            type="password"
+            value={pdfPassword}
+            onChange={(e) => setPdfPassword(e.target.value)}
+            placeholder="PDF password (if the statement is encrypted)"
+            className="w-full rounded-xl border border-slate-300 bg-white/70 px-3 py-2 text-sm text-slate-700 placeholder:text-slate-400 dark:border-slate-700 dark:bg-slate-800/70 dark:text-slate-200"
+          />
+        </div>
         {loading && <Spinner className="mt-3" />}
       </div>
 

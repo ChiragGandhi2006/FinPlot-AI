@@ -103,7 +103,16 @@ export function DataProvider({ children }) {
   const bootstrapped = useRef(false)
 
   useEffect(() => {
-    if (!isAuthenticated) return
+    if (!isAuthenticated) {
+      bootstrapped.current = false
+      setSummary(null)
+      setMonthlySummary([])
+      setCategoryExpense([])
+      setIncomes([])
+      setExpenses([])
+      setGoals([])
+      return
+    }
     if (bootstrapped.current) return
     bootstrapped.current = true
     fetchData()

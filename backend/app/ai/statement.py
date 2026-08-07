@@ -191,15 +191,30 @@ def parse_text_statement(text):
     return transactions
 
 
-def parse_statement(filename, content):
+class StatementParseError(Exception):
+    """Raised when a statement file cannot be parsed, with a user-facing message."""
+
+
+def parse_statement(filename, content, pdf_password=None):
     name = (filename or "").lower()
     if name.endswith(".csv"):
         return parse_csv_statement(content)
     if name.endswith((".txt", ".text")):
         return parse_text_statement(content.decode("utf-8", errors="replace"))
     if name.endswith(".pdf"):
-        text = _pdf_text(content)
-        return parse_text_statement(text) if text else []
+        text, err = _read_pdf(content, pdf_password)
+        if err:
+            raise StatementParseError(err)
+        if text and text.strip():
+            return parse_text_statement(text)
+        ocr_text = _ocr_pdf(content)
+        if ocr_text and ocr_text.strip():
+            return parse_text_statement(ocr_text)
+        raise StatementParseError(
+            "No text could be read from this PDF. If it is password-protected, "
+            "enter the statement password. If it is a scanned image and OCR is "
+            "not available, export the statement as CSV instead."
+        )
     # Unknown extension: try CSV then text
     try:
         txns = parse_csv_statement(content)
@@ -210,19 +225,67 @@ def parse_statement(filename, content):
     return parse_text_statement(content.decode("utf-8", errors="replace"))
 
 
-def _pdf_text(content):
+def _pdf_reader(content):
     try:
         from pypdf import PdfReader
+        return PdfReader
     except ImportError:
         try:
             from PyPDF2 import PdfReader
+            return PdfReader
         except ImportError:
             return None
+
+
+def _read_pdf(content, pdf_password=None):
+    """Extract text from a PDF. Returns (text, error_message)."""
+    Reader = _pdf_reader(content)
+    if Reader is None:
+        return None, "PDF support is not installed. Install pypdf and try again."
     try:
-        reader = PdfReader(io.BytesIO(content))
-        return "\n".join((page.extract_text() or "") for page in reader.pages)
+        reader = Reader(io.BytesIO(content))
     except Exception:
-        return None
+        return None, "Could not open the PDF. The file may be corrupted."
+    if reader.is_encrypted:
+        if not pdf_password:
+            return None, "This PDF is password-protected. Enter the statement password to unlock it."
+        try:
+            if reader.decrypt(pdf_password) == 0:
+                return None, "Incorrect PDF password. Please re-check the statement password and try again."
+        except Exception:
+            return None, "Could not unlock the PDF with the given password."
+    try:
+        text = "\n".join((page.extract_text() or "") for page in reader.pages)
+    except Exception:
+        text = ""
+    return text, None
+
+
+def _ocr_pdf(content):
+    """Best-effort OCR for scanned (image-only) PDFs using embedded page images."""
+    Reader = _pdf_reader(content)
+    if Reader is None:
+        return ""
+    try:
+        from io import BytesIO
+        from PIL import Image
+        import pytesseract
+    except ImportError:
+        return ""
+    try:
+        reader = Reader(io.BytesIO(content))
+        chunks = []
+        for page in reader.pages:
+            if getattr(page, "images", None):
+                for img in page.images:
+                    data = getattr(img, "data", None)
+                    if not data:
+                        continue
+                    image = Image.open(BytesIO(data))
+                    chunks.append(pytesseract.image_to_string(image))
+        return "\n".join(chunks)
+    except Exception:
+        return ""
 
 
 def analyze_transactions(transactions):

@@ -5,6 +5,7 @@ PDF (if pypdf/PyPDF2 is installed). Produces normalized transactions plus
 a summary and actionable, personalised suggestions.
 """
 
+import codecs
 import csv
 import io
 import re
@@ -13,37 +14,58 @@ from datetime import date, datetime
 from app.ai.categories import infer_expense_category
 
 DATE_FORMATS = [
-    "%d/%m/%Y", "%d-%m-%Y", "%d.%m.%Y", "%Y-%m-%d",
-    "%m/%d/%Y", "%m-%d-%Y", "%d %b %Y", "%d %B %Y",
-    "%d %b %y", "%b %d, %Y",
+    "%d/%m/%Y", "%d-%m-%Y", "%d.%m.%Y", "%d/%m/%y", "%d-%m-%y",
+    "%d-%b-%Y", "%d-%b-%y", "%d %b %Y", "%d %B %Y", "%d %b %y",
+    "%b %d, %Y", "%B %d, %Y", "%b %d, %y",
+    "%Y-%m-%d",
+    "%m/%d/%Y", "%m-%d-%Y", "%m/%d/%y", "%m-%d-%y",
 ]
 
 
 def parse_date(value):
+    """Parse a date cell, tolerating trailing time/junk components."""
     if value is None:
         return None
     text = str(value).strip()
-    for fmt in DATE_FORMATS:
-        try:
-            dt = datetime.strptime(text[:11], fmt)
-            return date(dt.year, dt.month, dt.day)
-        except (ValueError, TypeError):
-            continue
+    if not text:
+        return None
+    candidates = [text]
+    if len(text) > 11:
+        candidates += [text[:11], text[:10]]
+    first_token = text.split()[0]
+    if first_token != text and len(first_token) <= 11:
+        candidates.append(first_token)
+    for cand in candidates:
+        for fmt in DATE_FORMATS:
+            try:
+                dt = datetime.strptime(cand, fmt)
+                return date(dt.year, dt.month, dt.day)
+            except (ValueError, TypeError):
+                continue
     return None
 
 
 def parse_amount(value):
+    """Parse an amount cell, preserving its sign.
+
+    Returns the signed value: negative for debits written as negative
+    numbers or in parentheses (e.g. ``-450`` or ``(450)``).
+    """
     if value is None:
         return 0.0
     text = str(value).strip()
     if text in ("", "-"):
         return 0.0
-    sign = -1.0 if (text.startswith("(") and text.endswith(")")) else 1.0
-    if sign < 0:
+    sign = -1.0
+    if text.startswith("(") and text.endswith(")"):
         text = text[1:-1]
+    elif text.startswith("-"):
+        text = text[1:]
+    else:
+        sign = 1.0
     cleaned = text.replace(",", "").replace("₹", "").replace("Rs.", "").replace("Rs ", "").strip()
     try:
-        return sign * abs(float(cleaned))
+        return sign * float(cleaned)
     except ValueError:
         return 0.0
 
@@ -52,9 +74,12 @@ HEADER_SYNONYMS = {
     "date": ["date", "txn", "value date", "posting date", "dtar", "trans date", "transdate"],
     "narration": ["narration", "details", "description", "merchant", "particulars",
                   "remarks", "memo", "transaction", "transaction detail"],
-    "debit": ["debit", "withdrawal", "paidamount", "amount dr", "dr amount", " dr", "withdrawl"],
-    "credit": ["credit", "deposit", "amount cr", "cr amount", " cr", "deposits"],
-    "balance": ["balance", "closing balance", "running balance", "avail bal", " bal"],
+    "debit": ["debit", "withdrawal", "withdrawl", "paid amount", "amount dr", "dr amount"],
+    "credit": ["credit", "deposit", "amount cr", "cr amount", "deposits"],
+    "balance": ["balance", "closing balance", "running balance", "avail bal"],
+    "type": ["dr/cr", "dr or cr", "dr cr", "type", "txn type", "tran type",
+             "transaction type", "debit/credit", "credit/debit", "debit credit"],
+    "amount": ["amount", "amt", "transaction amount", "txn amount", "value"],
 }
 
 
@@ -67,7 +92,10 @@ def _match(norm, targets):
 
 
 def _resolve_columns(headers):
-    mapping = {"date": None, "narration": None, "debit": None, "credit": None, "balance": None}
+    mapping = {
+        "date": None, "narration": None, "debit": None, "credit": None,
+        "balance": None, "type": None, "amount": None,
+    }
     if not headers:
         return mapping
     for idx, header in enumerate(headers):
@@ -75,6 +103,10 @@ def _resolve_columns(headers):
         for key, targets in HEADER_SYNONYMS.items():
             if mapping[key] is None and _match(norm, targets):
                 mapping[key] = idx
+    if mapping["debit"] is not None and mapping["debit"] == mapping["amount"]:
+        mapping["amount"] = None
+    if mapping["credit"] is not None and mapping["credit"] == mapping["amount"]:
+        mapping["amount"] = None
     return mapping
 
 
@@ -89,8 +121,20 @@ def _looks_like_data_row(row):
     return any(parse_date(cell) for cell in row)
 
 
+def _decode_bytes(content):
+    """Decode statement bytes, honouring common encodings (UTF-8 BOM / UTF-16)."""
+    try:
+        if content.startswith(codecs.BOM_UTF16_LE) or content.startswith(codecs.BOM_UTF16_BE):
+            return content.decode("utf-16", errors="replace")
+        if content.startswith(codecs.BOM_UTF32_LE) or content.startswith(codecs.BOM_UTF32_BE):
+            return content.decode("utf-32", errors="replace")
+    except (UnicodeDecodeError, LookupError):
+        pass
+    return content.decode("utf-8-sig", errors="replace")
+
+
 def parse_csv_statement(content):
-    reader = csv.reader(io.StringIO(content.decode("utf-8-sig", errors="replace")))
+    reader = csv.reader(io.StringIO(_decode_bytes(content)))
     raw = [r for r in reader if any(str(c).strip() for c in r)]
     if not raw:
         return []
@@ -124,29 +168,49 @@ def _build_transaction(row, col):
     txn_date = parse_date(date_val)
     if txn_date is None:
         return None
+
     narration_val = _cell(row, col["narration"])
     if narration_val is None:
         narration_col = next(
             (i for i in range(len(row)) if i not in
-             (col["date"], col["debit"], col["credit"], col["balance"])),
+             (col["date"], col["debit"], col["credit"], col["balance"], col["type"], col["amount"])),
             None,
         )
         narration_val = _cell(row, narration_col) or "Transaction"
 
     debit = parse_amount(_cell(row, col["debit"]))
     credit = parse_amount(_cell(row, col["credit"]))
+    type_token = (_cell(row, col["type"]) or "").strip().lower()
 
-    if col["debit"] is None and col["credit"] is None:
-        amount = max([parse_amount(c) for c in row[col["date"] + 1:] if parse_amount(c) > 0] or [0])
-        txn_type = "debit"
+    if col["debit"] is not None or col["credit"] is not None:
+        if debit > 0 and credit == 0:
+            amount, txn_type = debit, "debit"
+        elif credit > 0 and debit == 0:
+            amount, txn_type = credit, "credit"
+        elif debit < 0 and credit == 0:
+            amount, txn_type = abs(debit), "credit"
+        elif credit < 0 and debit == 0:
+            amount, txn_type = abs(credit), "debit"
+        else:
+            return None
+    elif type_token:
+        amount_raw = _cell(row, col["amount"]) if col["amount"] is not None else _find_amount_cell(row, col)
+        amount = parse_amount(amount_raw)
         if amount <= 0:
             return None
-    elif debit > 0 and credit == 0:
-        amount, txn_type = debit, "debit"
-    elif credit > 0 and debit == 0:
-        amount, txn_type = credit, "credit"
+        txn_type = "debit" if type_token.startswith(("d", "w", "-", "(")) else "credit"
+    elif col["amount"] is not None:
+        amount = parse_amount(_cell(row, col["amount"]))
+        if amount == 0:
+            return None
+        txn_type = "debit" if amount < 0 else "credit"
+        amount = abs(amount)
     else:
-        return None
+        amount = _find_amount_cell(row, col)
+        if amount is None:
+            return None
+        txn_type = "debit" if amount < 0 else "credit"
+        amount = abs(amount)
 
     narration = (narration_val or "Transaction")
     if len(narration) > 80:
@@ -161,9 +225,19 @@ def _build_transaction(row, col):
     }
 
 
+def _find_amount_cell(row, col):
+    """Fallback: pick the signed amount from the remaining non-meta cells."""
+    used = {col["date"], col["narration"], col["debit"], col["credit"],
+            col["balance"], col["type"], col["amount"]}
+    values = [(i, parse_amount(c)) for i, c in enumerate(row) if i not in used and parse_amount(c) != 0]
+    if not values:
+        return None
+    return values[-1][1]
+
+
 def parse_text_statement(text):
     transactions = []
-    numeric_token = re.compile(r"^[0-9][0-9,]*(\.[0-9]{1,2})?$")
+    numeric_token = re.compile(r"^-?[0-9][0-9,]*(\.[0-9]{1,2})?$")
     for line in (text or "").splitlines():
         tokens = line.split()
         if not tokens:
@@ -174,17 +248,23 @@ def parse_text_statement(text):
         txn_date = parse_date(tokens[date_idx])
         rest = [t for i, t in enumerate(tokens) if i != date_idx]
         numeric = [parse_amount(t) for t in rest if numeric_token.match(t)]
-        real = [a for a in numeric if a > 0]
+        real = [a for a in numeric if a != 0]
         if not real:
             continue
         amount = real[-1]
         merchant_words = [t.strip(",") for t in rest if not numeric_token.match(t)]
         merchant = " ".join(merchant_words).strip() or "Statement txn"
-        txn_type = "debit" if any(t.upper() in ("DR", "DEBIT", "DBT") for t in rest) else "credit"
+        type_hint = next((t.upper() for t in rest if t.upper() in ("DR", "DEBIT", "DBT", "CR", "CREDIT", "CDT")), "")
+        if type_hint in ("CR", "CREDIT", "CDT"):
+            txn_type = "credit"
+        elif type_hint:
+            txn_type = "debit"
+        else:
+            txn_type = "debit" if amount < 0 else "credit"
         transactions.append({
             "date": txn_date.isoformat(),
             "merchant": merchant,
-            "amount": amount,
+            "amount": abs(amount),
             "type": txn_type,
             "category": infer_expense_category(merchant),
         })
@@ -200,7 +280,7 @@ def parse_statement(filename, content, pdf_password=None):
     if name.endswith(".csv"):
         return parse_csv_statement(content)
     if name.endswith((".txt", ".text")):
-        return parse_text_statement(content.decode("utf-8", errors="replace"))
+        return parse_text_statement(_decode_bytes(content))
     if name.endswith(".pdf"):
         text, err = _read_pdf(content, pdf_password)
         if err:
@@ -222,7 +302,7 @@ def parse_statement(filename, content, pdf_password=None):
             return txns
     except Exception:
         pass
-    return parse_text_statement(content.decode("utf-8", errors="replace"))
+    return parse_text_statement(_decode_bytes(content))
 
 
 def _pdf_reader(content):

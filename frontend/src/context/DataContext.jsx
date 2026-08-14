@@ -24,7 +24,11 @@ import {
   totalByMonth,
 } from '../utils/analytics'
 import { generateInsights } from '../utils/insights'
-import { getItem, setItem } from '../utils/storage'
+import {
+  getItem, setItem, exportBackup, importBackup,
+  encryptBackup, decryptBackup,
+  enqueueSync, runSync
+} from '../utils/storage'
 import { useAuth } from './AuthContext'
 
 const DataContext = createContext(null)
@@ -116,6 +120,8 @@ export function DataProvider({ children }) {
     if (bootstrapped.current) return
     bootstrapped.current = true
     fetchData()
+    // Run sync check on mount
+    runSync()
   }, [isAuthenticated, fetchData])
 
   const streak = useMemo(() => {
@@ -299,14 +305,16 @@ export function DataProvider({ children }) {
   const updateGoal = useCallback((id, payload) => runMutation(() => goalApi.update(id, payload), 'Goal updated'), [runMutation])
   const deleteGoal = useCallback((id) => runMutation(() => goalApi.remove(id), 'Goal deleted'), [runMutation])
 
-  /* ---------- Client-side stores ---------- */
+  /* ---------- Client-side stores with sync backup ---------- */
   const saveBudgets = useCallback((next) => {
     setBudgets(next)
     setItem(LS_KEYS.budgets, next)
+    enqueueSync('budgets', next)
   }, [])
   const saveSubscriptions = useCallback((next) => {
     setSubscriptions(next)
     setItem(LS_KEYS.subscriptions, next)
+    enqueueSync('subscriptions', next)
   }, [])
   const markNotificationRead = useCallback((id) => {
     setNotifications((prev) => {

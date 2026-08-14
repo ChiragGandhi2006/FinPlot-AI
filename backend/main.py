@@ -6,6 +6,7 @@ from app.database.seed import seed_expense_categories
 from app.api.dashboard import router as dashboard_router
 from app.api.goal import router as goal_router
 from app.api.income import router as income_router
+from app.api.sync import router as sync_router
 from app.database.database import SessionLocal
 from app.api.report import router as report_router
 from app.core.logging import logger
@@ -57,6 +58,7 @@ app.include_router(dashboard_router)
 app.include_router(goal_router)
 app.include_router(report_router)
 app.include_router(ai_router)
+app.include_router(sync_router)
 logger.info("Testing logging module")
 
 

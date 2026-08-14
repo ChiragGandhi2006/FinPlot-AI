@@ -16,6 +16,7 @@ class Settings(BaseSettings):
     AI_MODEL: str = ""
 
     AI_BASE_URL: str = "https://api.openai.com/v1"
+    SYNC_PASSWORD: str = "finpilot-sync-default-change-me"
 
     model_config = SettingsConfigDict(
         env_file=".env",

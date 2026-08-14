@@ -73,3 +73,58 @@
 2026-08-10 08:28:37,518 | INFO | FinPilotAI | Testing logging module
 2026-08-10 09:11:44,544 | INFO | FinPilotAI | Testing logging module
 2026-08-10 09:11:44,920 | INFO | FinPilotAI | Testing logging module
+2026-08-14 19:09:50,023 | INFO | FinPilotAI | Testing logging module
+2026-08-14 19:09:50,470 | INFO | FinPilotAI | Testing logging module
+2026-08-14 19:13:31,528 | INFO | FinPilotAI | Testing logging module
+2026-08-14 19:13:31,749 | INFO | FinPilotAI | Testing logging module
+2026-08-14 19:17:24,511 | INFO | FinPilotAI | Testing logging module
+2026-08-14 19:17:24,681 | INFO | FinPilotAI | Testing logging module
+2026-08-14 19:57:39,737 | ERROR | asyncio | Exception in callback _ProactorBasePipeTransport._call_connection_lost()
+handle: <Handle _ProactorBasePipeTransport._call_connection_lost()>
+Traceback (most recent call last):
+  File "C:\Program Files\Python313\Lib\asyncio\events.py", line 89, in _run
+    self._context.run(self._callback, *self._args)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\Python313\Lib\asyncio\proactor_events.py", line 165, in _call_connection_lost
+    self._sock.shutdown(socket.SHUT_RDWR)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+ConnectionResetError: [WinError 10054] An existing connection was forcibly closed by the remote host
+2026-08-14 19:57:40,071 | ERROR | asyncio | Exception in callback _ProactorBasePipeTransport._call_connection_lost()
+handle: <Handle _ProactorBasePipeTransport._call_connection_lost()>
+Traceback (most recent call last):
+  File "C:\Program Files\Python313\Lib\asyncio\events.py", line 89, in _run
+    self._context.run(self._callback, *self._args)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\Python313\Lib\asyncio\proactor_events.py", line 165, in _call_connection_lost
+    self._sock.shutdown(socket.SHUT_RDWR)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+ConnectionResetError: [WinError 10054] An existing connection was forcibly closed by the remote host
+2026-08-14 20:02:04,785 | INFO | FinPilotAI | Testing logging module
+2026-08-14 20:02:32,127 | INFO | FinPilotAI | Testing logging module
+2026-08-14 20:03:00,560 | INFO | FinPilotAI | Testing logging module
+2026-08-14 20:04:49,239 | INFO | FinPilotAI | Testing logging module
+2026-08-14 20:04:49,538 | INFO | FinPilotAI | Testing logging module
+2026-08-14 20:07:12,485 | INFO | FinPilotAI | Testing logging module
+2026-08-14 20:07:12,751 | INFO | FinPilotAI | Testing logging module
+2026-08-14 20:08:54,332 | INFO | FinPilotAI | Testing logging module
+2026-08-14 20:08:54,671 | INFO | FinPilotAI | Testing logging module
+2026-08-14 20:18:57,372 | INFO | FinPilotAI | Testing logging module
+2026-08-14 20:18:57,650 | INFO | FinPilotAI | Testing logging module
+2026-08-14 20:55:10,181 | INFO | FinPilotAI | Testing logging module
+2026-08-14 20:55:10,561 | INFO | FinPilotAI | Testing logging module
+2026-08-14 21:02:20,843 | INFO | FinPilotAI | Testing logging module
+2026-08-14 21:02:21,108 | INFO | FinPilotAI | Testing logging module
+2026-08-14 21:03:57,795 | INFO | FinPilotAI | Testing logging module
+2026-08-14 21:03:58,012 | INFO | FinPilotAI | Testing logging module
+2026-08-14 21:04:39,267 | INFO | FinPilotAI | Testing logging module
+2026-08-14 21:04:39,530 | INFO | FinPilotAI | Testing logging module
+2026-08-14 21:18:00,511 | ERROR | asyncio | Exception in callback _ProactorBasePipeTransport._call_connection_lost()
+handle: <Handle _ProactorBasePipeTransport._call_connection_lost()>
+Traceback (most recent call last):
+  File "C:\Program Files\Python313\Lib\asyncio\events.py", line 89, in _run
+    self._context.run(self._callback, *self._args)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\Python313\Lib\asyncio\proactor_events.py", line 165, in _call_connection_lost
+    self._sock.shutdown(socket.SHUT_RDWR)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+ConnectionResetError: [WinError 10054] An existing connection was forcibly closed by the remote host

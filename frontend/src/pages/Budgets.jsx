@@ -8,7 +8,7 @@ import Modal from '../components/ui/Modal'
 import ConfirmDialog from '../components/ui/ConfirmDialog'
 import { Input, Select } from '../components/ui/Input'
 import { formatMoney } from '../utils/format'
-import { BUDGET_CATEGORIES, EXPENSE_CATEGORY_META } from '../constants'
+import { DEFAULTS_BUDGETS, BUDGET_CATEGORIES, EXPENSE_CATEGORY_META } from '../constants'
 import ProgressBar from '../components/ui/ProgressBar'
 import { useLocalStorage } from '../hooks/useLocalStorage'
 import { LS_KEYS } from '../constants'
@@ -25,7 +25,7 @@ function budgetStatus(spent, limit) {
 
 export default function Budgets() {
   const { expenses, expenseCategories } = useData()
-  const [budgets, setBudgets] = useLocalStorage(LS_KEYS.budgets, BUDGET_CATEGORIES)
+  const [budgets, setBudgets] = useLocalStorage(LS_KEYS.budgets, DEFAULTS_BUDGETS)
   const [modal, setModal] = useState(null)
   const [editing, setEditing] = useState(null)
   const [deleting, setDeleting] = useState(null)

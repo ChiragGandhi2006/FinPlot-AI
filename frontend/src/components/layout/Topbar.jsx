@@ -153,6 +153,30 @@ export default function Topbar({ onToggleSidebar, onOpenMobile }) {
                   <button
                     onClick={() => {
                       setProfileOpen(false)
+                      const data = exportBackup(getItem(LS_KEYS.budgets, DEFAULTS_BUDGETS))
+                      if (data) {
+                        alert('Budget backup exported! You can import it later from the backup file.')
+                      }
+                    }}
+                    className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-indigo-50 dark:text-slate-200 dark:hover:bg-indigo-500/10"
+                  >
+                    <Sparkles size={17} /> Backup Budgets
+                  </button>
+                  <button
+                    onClick={() => setProfileOpen(false)}
+                    className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-indigo-50 dark:text-slate-200 dark:hover:bg-indigo-500/10 sm:hidden"
+                  >
+                    {dark ? <Sun size={17} /> : <Moon size={17} />}{" "}Toggle Theme
+                  </button>
+                  <button
+                    onClick={() => setProfileOpen(false)}
+                    className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-indigo-50 dark:text-slate-200 dark:hover:bg-indigo-500/10 sm:hidden"
+                  >
+                    Toggle Theme
+                  </button>
+                  <button
+                    onClick={() => {
+                      setProfileOpen(false)
                       navigate('/app/insights')
                     }}
                     className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-indigo-50 dark:text-slate-200 dark:hover:bg-indigo-500/10"

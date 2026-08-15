@@ -19,6 +19,7 @@ import HealthScore from '../components/dashboard/HealthScore'
 import RecentTransactions from '../components/dashboard/RecentTransactions'
 import QuickActions from '../components/dashboard/QuickActions'
 import InsightCard, { InsightsHeader } from '../components/dashboard/InsightCard'
+import DailyShopSummary from '../components/dashboard/DailyShopSummary'
 import IncomeExpenseBarChart from '../components/charts/IncomeExpenseBarChart'
 import CategoryPieChart from '../components/charts/CategoryPieChart'
 import SavingsAreaChart from '../components/charts/SavingsAreaChart'
@@ -124,6 +125,8 @@ export default function Dashboard() {
           loading={loading}
         />
       </div>
+
+      <DailyShopSummary />
 
       {/* Savings rate + health */}
       <div className="grid grid-cols-1 gap-4 xl:grid-cols-3">

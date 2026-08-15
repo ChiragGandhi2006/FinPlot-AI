@@ -30,7 +30,13 @@ import {
   Crown,
 } from 'lucide-react'
 
-export const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+const configuredApiUrl = import.meta.env.VITE_API_URL
+
+// Keep local development functional when the deployment placeholder is present.
+export const API_BASE_URL =
+  configuredApiUrl && !configuredApiUrl.includes('your-production-domain.com')
+    ? configuredApiUrl
+    : '/api'
 
 export const LS_KEYS = {
   token: 'finpilot_token',

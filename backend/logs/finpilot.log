@@ -128,3 +128,19 @@ Traceback (most recent call last):
     self._sock.shutdown(socket.SHUT_RDWR)
     ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
 ConnectionResetError: [WinError 10054] An existing connection was forcibly closed by the remote host
+2026-08-15 13:13:20,197 | INFO | FinPilotAI | Testing logging module
+2026-08-15 13:13:20,680 | INFO | FinPilotAI | Testing logging module
+2026-08-15 13:15:37,237 | INFO | FinPilotAI | Testing logging module
+2026-08-15 13:15:37,567 | INFO | FinPilotAI | Testing logging module
+2026-08-15 13:19:28,267 | INFO | FinPilotAI | Testing logging module
+2026-08-15 13:19:28,602 | INFO | FinPilotAI | Testing logging module
+2026-08-15 13:22:49,156 | INFO | FinPilotAI | Testing logging module
+2026-08-15 13:22:49,524 | INFO | FinPilotAI | Testing logging module
+2026-08-15 13:23:14,089 | INFO | FinPilotAI | Testing logging module
+2026-08-15 13:23:14,418 | INFO | FinPilotAI | Testing logging module
+2026-08-15 14:14:13,432 | INFO | FinPilotAI | Testing logging module
+2026-08-15 14:14:13,815 | INFO | FinPilotAI | Testing logging module
+2026-08-15 14:22:01,567 | INFO | FinPilotAI | Testing logging module
+2026-08-15 14:22:01,900 | INFO | FinPilotAI | Testing logging module
+2026-08-15 14:25:14,946 | INFO | FinPilotAI | Testing logging module
+2026-08-15 14:25:15,134 | INFO | FinPilotAI | Testing logging module

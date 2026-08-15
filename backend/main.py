@@ -22,6 +22,8 @@ from app.api.auth import router as auth_router
 from app.database.database import Base, engine
 from app.api.income_category import router as income_category_router
 from app.ai.router import router as ai_router
+from app.api.daily_shop import router as daily_shop_router
+from app.api.shop_sale import router as shop_sale_router
 from app.models import *
 
 app = FastAPI(
@@ -34,6 +36,7 @@ app.add_middleware(
         "https://your-production-domain.com",
         "http://localhost:5173",
         "http://127.0.0.1:5173",
+        "http://10.213.36.112:5173",
     ],
     allow_credentials=False,
     allow_methods=["*"],
@@ -57,6 +60,8 @@ app.include_router(goal_router)
 app.include_router(report_router)
 app.include_router(ai_router)
 app.include_router(sync_router)
+app.include_router(daily_shop_router)
+app.include_router(shop_sale_router)
 logger.info("Testing logging module")
 
 

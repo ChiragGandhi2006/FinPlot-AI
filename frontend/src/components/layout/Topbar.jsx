@@ -23,8 +23,10 @@ import Tooltip from '../ui/Tooltip'
 import NotificationsPanel from './NotificationsPanel'
 import GlobalSearch from './GlobalSearch'
 import { useClickOutside } from '../../hooks/useClickOutside'
+import { exportBackup, getItem } from '../../utils/storage'
+import { DEFAULTS_BUDGETS, LS_KEYS } from '../../constants'
 
-export default function Topbar({ onToggleSidebar, onOpenMobile }) {
+export default function Topbar({ onToggleSidebar, onToggleMobile }) {
   const { user, logout } = useAuth()
   const { dark, toggle } = useTheme()
   const { notifications } = useData()
@@ -46,8 +48,8 @@ export default function Topbar({ onToggleSidebar, onOpenMobile }) {
     <header className="sticky top-0 z-40 border-b border-slate-200/60 bg-white/70 backdrop-blur-xl dark:border-slate-800/60 dark:bg-slate-950/60">
       <div className="flex items-center gap-3 px-4 py-3 sm:px-6">
         <button
-          onClick={onOpenMobile}
-          aria-label="Open menu"
+          onClick={onToggleMobile}
+          aria-label="Toggle menu"
           className="rounded-xl p-2 text-slate-500 transition hover:bg-slate-100 dark:hover:bg-slate-800 lg:hidden"
         >
           <Menu size={20} />
@@ -161,18 +163,6 @@ export default function Topbar({ onToggleSidebar, onOpenMobile }) {
                     className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-indigo-50 dark:text-slate-200 dark:hover:bg-indigo-500/10"
                   >
                     <Sparkles size={17} /> Backup Budgets
-                  </button>
-                  <button
-                    onClick={() => setProfileOpen(false)}
-                    className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-indigo-50 dark:text-slate-200 dark:hover:bg-indigo-500/10 sm:hidden"
-                  >
-                    {dark ? <Sun size={17} /> : <Moon size={17} />}{" "}Toggle Theme
-                  </button>
-                  <button
-                    onClick={() => setProfileOpen(false)}
-                    className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-indigo-50 dark:text-slate-200 dark:hover:bg-indigo-500/10 sm:hidden"
-                  >
-                    Toggle Theme
                   </button>
                   <button
                     onClick={() => {

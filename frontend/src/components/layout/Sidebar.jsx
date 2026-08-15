@@ -174,7 +174,7 @@ export default function Sidebar({ collapsed, mobileOpen, onClose }) {
       {/* Mobile drawer */}
       <AnimatePresence>
         {mobileOpen && (
-          <div className="fixed inset-0 z-[90] lg:hidden">
+          <div className="fixed inset-0 z-30 lg:hidden">
             <motion.div
               className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
               initial={{ opacity: 0 }}
